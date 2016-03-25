@@ -34,8 +34,7 @@ object FilterGeoRangeJob {
         val lon = line(DataSchema.LON).toDouble
         val lat = line(DataSchema.LAT).toDouble
         var selected = false
-        if( lon >= lonRange._1 && lon <= lonRange._2 &&
-            lat >= latRange._1 && lat <= latRange._2)
+        if( lon >= lonRange._1 && lon <= lonRange._2 && lat >= latRange._1 && lat <= latRange._2)
           selected = true
         selected
     })

@@ -36,21 +36,27 @@ object CleanseMob extends Serializable {
 
     // filter out users without sufficient observations
     val validUsers = input.groupBy(_.uid).mapValues { logs => {
+
       val timed = logs.map { m => (m, m.time.toLong/1800, m.time.toLong/86400) }
+
       val dailyStat = timed.groupBy(_._3).mapValues { obs => {
         val ocnt = obs.size // observation number
         val icnt = obs.map(_._2).toArray.distinct.size // interval number
         (ocnt, icnt)
       }}
+
       val tdays = dailyStat.keys.size // total days
       val docnt = dailyStat.map(_._2._1).sum / tdays // observations per day
       val dicnt = dailyStat.map(_._2._1).sum / tdays // intervals per day
       val ulocs = logs.map(_.location).toArray.distinct.size // distinct location number
+
       (docnt, dicnt, tdays, ulocs)
-    }}.filter(m => m._2._1 >= minDailyObs
-      && m._2._2 >= minDailyInt
-      && m._2._3 >= minDays
-      && m._2._4 >= minTotalLoc)
+    }}
+
+      .filter(m => m._2._1 >= minDailyObs
+        && m._2._2 >= minDailyInt
+        && m._2._3 >= minDays
+        && m._2._4 >= minTotalLoc)
 
     // group by users and tidy logs for each user
     input.keyBy(_.uid).join(validUsers)

@@ -1,8 +1,13 @@
-package cn.edu.sjtu.omnilab.kalin.d4d
+package cn.edu.sjtu.omnilab.kalin.senegal
 
 import cn.edu.sjtu.omnilab.kalin.stlab.{STUtils, MPoint, CleanseMob}
 import org.apache.spark.{SparkContext, SparkConf}
 
+
+/**
+  * Wangle Senegal mobility data with the same strategy employed
+  * in Hangzhou data. Work fot both data set2 and set3.
+  */
 object TidyMovementJob {
 
   def main(args: Array[String]) = {
@@ -15,7 +20,7 @@ object TidyMovementJob {
     val input = args(0)
     val output = args(1)
     
-    val conf =  new SparkConf().setAppName("Tidy D4D movement history")
+    val conf =  new SparkConf().setAppName("Tidy Senegal mobility data")
     val spark = new SparkContext(conf)
     
     val inputRDD = spark.textFile(input).map(_.split(",")).cache
@@ -28,6 +33,7 @@ object TidyMovementJob {
     })
     
     val tidyMove = CleanseMob.cleanse(formatedRDD, minDays=14*0.75, tzOffset=0, addNight=true)
+
     tidyMove
       .sortBy(tuple => (tuple.uid, tuple.time))
       .map(tuple => "%s,%.3f,%s".format(tuple.uid, tuple.time, tuple.location))

@@ -6,7 +6,15 @@ import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.SparkContext.rddToPairRDDFunctions
 
 /**
- * Export Hangzhou mobile data in the long format.
+ * Cleanse and export Hangzhou mobile data into long format.
+ * 0,1345057200.000,37809
+ * 0,1345083339.812,37809
+ * 0,1345143600.000,37809
+ * 0,1345179491.410,37809
+ * 0,1345193826.864,37809
+ * 0,1345194937.249,37809
+ * 0,1345194976.465,22694
+ * 0,1345194990.815,2136
  */
 object TidyMovementJob {
   

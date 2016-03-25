@@ -56,6 +56,6 @@ logs/users/cells numbers;
 specifically out the range of HZ administrative area;
 * `TidyMovementJob`: filter out redundant movement history to keep data brief;
 
-Package `cn.edu.sjtu.omnilab.kalin.d4d` contains jobs for D4D data:
+Package `cn.edu.sjtu.omnilab.kalin.senegal` contains jobs for D4D data:
 
 * `TidyMovementJob`: filter out redundant movement history to keep data brief;
