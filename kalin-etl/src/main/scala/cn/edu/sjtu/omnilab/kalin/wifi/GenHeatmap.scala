@@ -3,43 +3,46 @@ package cn.edu.sjtu.omnilab.kalin.wifi
 import cn.edu.sjtu.omnilab.kalin.stlab._
 import org.apache.spark.{SparkConf, SparkContext}
 
-object GenWifiFlowmap {
+/**
+ * The modified method to generate heatmap for WifiSyslog
+ *
+ * Input: hdfs://user/omnilab/warehouse/WifiSyslog/
+ */
+object GenHeatmap {
 
   val apToBuild = new APToBuilding()
 
   def main(args: Array[String]) = {
     
     if (args.length < 2){
-      println("Usage: GenWifiFlowmap <wifisyslog> <out> [interval=86400] [minnum=1]")
+      println("Usage: GenHeatmap <WifiSyslog> <out> [interval=3600]")
       sys.exit(-1)
     }
     
     val input = args(0)
     val output = args(1)
-    var minnum = 1
-    var interval = 86400
+    var interval = 3600
 
     if (args.size >= 3)
       interval = args(2).toInt
 
-    if (args.size >= 4)
-      minnum = args(3).toInt
-
-    val conf =  new SparkConf().setAppName("Generate flowmap for WifiSyslog")
+    val conf =  new SparkConf()
+      .setAppName("Generate heatmap for WifiSyslog")
     val spark = new SparkContext(conf)
     
-    val formatedRDD =
+    val inRDD =
       spark.textFile(input).map(_.split(","))
         .map(parts => {
           val uid = parts(0)
-          val time = parts(1).toLong / 1000.0
+          val time = STUtils.ISOToUnix(parts(1)) / 1000.0
           val messageCode = parts(2).toInt
+
           if ( List(0,1,2,3).contains(messageCode) ) {
             val buildInfo = apToBuild.parse(parts(3))
             if (buildInfo == null) {
               null
             } else {
-              val loc = "%s,%s,%s".format(buildInfo.get(0), buildInfo.get(3), buildInfo.get(4))
+              val loc = buildInfo.get(0)
               STPoint(uid, time, loc)
             }
           } else {
@@ -47,15 +50,14 @@ object GenWifiFlowmap {
           }
         })
         .filter(_ != null)
-    
-    Flowmap.draw(formatedRDD, interval)
 
-      .filter(_.NumUnique >= minnum)
+    // Count statistics for heatmap
+    Heatmap.draw(inRDD, interval)
 
-      .sortBy(m => (m.interval, m.FROM, m.TO))
+      .sortBy(m => (m.interval, m.loc))
 
-      .map(m => "%d,%s,%s,%d,%d"
-        .format(m.interval, m.FROM, m.TO, m.NumTotal, m.NumUnique))
+      .map(m => "%d,%s,%d"
+        .format(m.interval, m.loc, m.unique))
 
       .saveAsTextFile(output)
     
